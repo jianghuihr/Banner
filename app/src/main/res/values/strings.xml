@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Banner</string>
+    <string name="banner_index">Banner%1$s</string>
+</resources>
