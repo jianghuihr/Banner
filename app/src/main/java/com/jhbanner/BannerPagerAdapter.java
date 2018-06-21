@@ -1,9 +1,12 @@
 package com.jhbanner;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,11 +52,7 @@ public class BannerPagerAdapter extends PagerAdapter {
 
     public void refresh(List<View> bannerList) {
         this.bannerList.clear();
-        View first = bannerList.get(0);
-        View last = bannerList.get(bannerList.size() - 1);
-        this.bannerList.add(last);
         this.bannerList.addAll(bannerList);
-        this.bannerList.add(first);
         notifyDataSetChanged();
     }
 }

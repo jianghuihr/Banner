@@ -28,7 +28,14 @@ public class MainActivity extends AppCompatActivity {
     private int mCurrentBanner = 1;
     private int mBannerCount;
     private boolean mIsUserTouch = false;
+    private boolean mIsSlideShow = false;
     private long mUserTouchTime = 0L;
+    private int[] bannerColor = new int[]{
+            android.R.color.holo_blue_light,
+            android.R.color.holo_green_light,
+            android.R.color.holo_purple,
+            android.R.color.holo_red_light,
+            android.R.color.holo_orange_light};
 
     private Handler mHandler = new Handler();
     private final long DELAY_DURATION = 2000L;
@@ -38,6 +45,9 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void run() {
             if (mIsUserTouch) {
+                return;
+            }
+            if (!mIsSlideShow) {
                 return;
             }
             mCurrentBanner = mCurrentBanner % (mBannerCount + 1) + 1;
@@ -86,38 +96,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void stopSlideShow() {
         mHandler.removeCallbacks(mBannerSlideShowTask);
-    }
-
-    private void initPagerScrollDuration() {
-        try {
-            Field scrollField = mBannerPager.getClass().getDeclaredField("mScroller");
-            scrollField.setAccessible(true);
-            BannerScroller bannerScroller = new BannerScroller(mContext);
-            bannerScroller.setScrollDuration(PAGER_SCROLL_DURATION);
-            scrollField.set(mBannerPager, bannerScroller);
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void initBannerView() {
-        int[] bannerColor = new int[]{
-                android.R.color.holo_blue_light,
-                android.R.color.holo_green_light,
-                android.R.color.holo_purple,
-                android.R.color.holo_red_light,
-                android.R.color.holo_orange_light};
-
-        for (int i = 0; i < 5; i++) {
-            View view = new BannerPresenter(mContext).getView();
-            TextView bannerTV = view.findViewById(R.id.tv_banner);
-            bannerTV.setText(mContext.getString(R.string.banner_index, String.valueOf(i)));
-            bannerTV.setBackgroundColor(ContextCompat.getColor(mContext, bannerColor[i]));
-            mBannerList.add(view);
-        }
-        mBannerCount = mBannerList.size();
     }
 
     private void initView() {
@@ -177,6 +155,9 @@ public class MainActivity extends AppCompatActivity {
 
         mBannerTabLayout = findViewById(R.id.banner_tabLayout);
         mBannerTabLayout.setupWithViewPager(mBannerPager);
+        if(mBannerCount <= 1) {
+            mBannerTabLayout.setVisibility(View.GONE);
+        }
 
         for (int i = 0; i < mBannerCount + 2; i++) {
             View view = LayoutInflater.from(mContext).inflate(R.layout.view_banner_tab, null);
@@ -223,7 +204,52 @@ public class MainActivity extends AppCompatActivity {
         });
 
         mBannerPager.setCurrentItem(1);
+    }
 
+    private void initPagerScrollDuration() {
+        try {
+            Field scrollField = mBannerPager.getClass().getDeclaredField("mScroller");
+            scrollField.setAccessible(true);
+            BannerScroller bannerScroller = new BannerScroller(mContext);
+            bannerScroller.setScrollDuration(PAGER_SCROLL_DURATION);
+            scrollField.set(mBannerPager, bannerScroller);
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+    }
 
+    private void initBannerView() {
+        List<View> middleBannerList = new ArrayList<>();
+        for (int i = 0; i < 8; i++) {
+            View view = getBannerView(i);
+            middleBannerList.add(view);
+        }
+        mBannerCount = middleBannerList.size();
+
+        if (mBannerCount >= 1) {
+            View first = getBannerView(0);
+            View last = getBannerView(middleBannerList.size() - 1);
+
+            mBannerList.add(last);
+            mBannerList.addAll(middleBannerList);
+            mBannerList.add(first);
+
+            if (mBannerCount <= 1) {
+                mIsSlideShow = false;
+            } else {
+                mIsSlideShow = true;
+            }
+        }
+    }
+
+    private View getBannerView(int position) {
+        position = position % 5;
+        View view = new BannerPresenter(mContext).getView();
+        TextView bannerTV = view.findViewById(R.id.tv_banner);
+        bannerTV.setText(mContext.getString(R.string.banner_index, String.valueOf(position)));
+        bannerTV.setBackgroundColor(ContextCompat.getColor(mContext, bannerColor[position]));
+        return view;
     }
 }
