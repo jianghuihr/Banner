@@ -222,7 +222,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void initBannerView() {
         List<View> middleBannerList = new ArrayList<>();
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < 5; i++) {
             View view = getBannerView(i);
             middleBannerList.add(view);
         }
